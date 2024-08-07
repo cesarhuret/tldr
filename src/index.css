@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: #fff;
+  background-color:#101010;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --privy-border-radius-sm: '0px';
+  --privy-border-radius-md: '0px!important';
+  --privy-border-radius-mdlg: '0px!important';
+  --privy-border-radius-lg: '0px!important';
+  --privy-border-radius-full: '0px';
+  --privy-color-background: '#000!important';
+  --privy-color-background-2: '#000';
+  --privy-color-foreground: '#000';
+  --privy-color-foreground-2: '#fff';
+  --privy-color-foreground-3: '#fff';
+  --privy-color-foreground-4: '#fff';
+  --privy-color-foreground-accent: '#fff';
+  --privy-color-accent: '#fff!important';
+  --privy-color-accent-light: '#fff!important';
+  --privy-color-accent-dark: '#fff!important';
+  --privy-color-success: 'your-custom-value';
+  --privy-color-error: 'your-custom-value';
+  --privy-color-error-light: 'your-custom-value';
+
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
