@@ -1,8 +1,9 @@
 import { Popover, PopoverContent, PopoverTrigger } from "./Popover";
 import { Skeleton } from "./Skeleton";
 import { Wrapper } from "./Wrapper";
-import { Source } from "../interfaces/Source";
+import { Source } from "../interfaces/source";
 import { FC } from "react";
+import Markdown from "react-markdown";
 
 export const Answer: FC<{ markdown: string; sources: Source[] }> = ({
   markdown,
@@ -13,7 +14,7 @@ export const Answer: FC<{ markdown: string; sources: Source[] }> = ({
       title={"Answer"}
       content={
         markdown ? (
-          <div className="prose prose-sm max-w-full">
+          <div className="prose prose-sm max-w-full text-white">
             <Markdown
               components={{
                 a: ({ node: _, ...props }) => {
@@ -26,7 +27,7 @@ export const Answer: FC<{ markdown: string; sources: Source[] }> = ({
                         <PopoverTrigger asChild>
                           <span
                             title={source.name}
-                            className="inline-block cursor-pointer transform scale-[60%] no-underline font-medium bg-zinc-300 hover:bg-zinc-400 w-6 text-center h-6 rounded-full origin-top-left"
+                            className="inline-block cursor-pointer transform scale-[60%] no-underline font-medium bg-gray-900 hover:bg-zinc-400 w-6 text-center h-6 rounded-full origin-top-left"
                           >
                             {props.href}
                           </span>
@@ -47,7 +48,7 @@ export const Answer: FC<{ markdown: string; sources: Source[] }> = ({
                               </div>
                             )}
                             <div className="flex-1">
-                              <div className="line-clamp-4 text-zinc-500 break-words">
+                              <div className="line-clamp-4 text-zinc-400 break-words">
                                 {source.snippet}
                               </div>
                             </div>
@@ -87,11 +88,11 @@ export const Answer: FC<{ markdown: string; sources: Source[] }> = ({
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <Skeleton className="max-w-sm h-4 bg-[#222]"></Skeleton>
-            <Skeleton className="max-w-lg h-4 bg-[#222]"></Skeleton>
-            <Skeleton className="max-w-2xl h-4 bg-[#222]"></Skeleton>
-            <Skeleton className="max-w-lg h-4 bg-[#222]"></Skeleton>
-            <Skeleton className="max-w-xl h-4 bg-[#222]"></Skeleton>
+            <Skeleton className="max-w-sm h-4 bg-[#222]"/>
+            <Skeleton className="max-w-lg h-4 bg-[#222]"/>
+            <Skeleton className="max-w-2xl h-4 bg-[#222]"/>
+            <Skeleton className="max-w-lg h-4 bg-[#222]"/>
+            <Skeleton className="max-w-xl h-4 bg-[#222]"/>
           </div>
         )
       }

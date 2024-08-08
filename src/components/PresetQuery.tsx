@@ -9,7 +9,7 @@ export const PresetQuery: FC<{ query: string }> = ({ query }) => {
     <a
       title={query}
       href={getSearchUrl(query, rid)}
-      className="border border-[#252525] text-ellipsis overflow-hidden text-nowrap items-center rounded-lg bg-transparent transition-all hover:text-[#e0e0e0] px-2 py-1 text-xs font-medium text-[#c0c0c0]"
+      className="border border-[#252525] text-ellipsis w-min overflow-hidden text-nowrap items-center rounded-lg bg-transparent transition-all hover:text-[#e0e0e0] px-2 py-1 text-xs font-medium text-[#c0c0c0]"
     >
       {query}
     </a>

@@ -4,7 +4,7 @@ import { Result } from "../components/Result";
 import { Search as SearchComponent } from "../components/Search";
 
 export const Search = () => {
-  let [searchParams, setSearchParams] = useSearchParams();
+  let [searchParams] = useSearchParams();
   const query = decodeURIComponent(searchParams.get("q") || "");
   const rid = decodeURIComponent(searchParams.get("rid") || "");
 

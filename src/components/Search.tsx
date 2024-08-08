@@ -1,4 +1,7 @@
-import React, { FC, useState } from "react";
+import { FC, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getSearchUrl } from "../utils/get-search-url";
+import { nanoid } from "nanoid";
 
 export const Search: FC<{ _prompt?: string }> = ({
   _prompt,
@@ -6,14 +9,14 @@ export const Search: FC<{ _prompt?: string }> = ({
   _prompt?: string;
 }) => {
   const [prompt, setPrompt] = useState(_prompt);
-  // const router = useRouter();
+  const navigate = useNavigate();
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         if (prompt) {
           setPrompt("");
-          // router.push(getSearchUrl(encodeURIComponent(value), nanoid()));
+          navigate(getSearchUrl(encodeURIComponent(prompt), nanoid()));
         }
       }}
     >
@@ -27,7 +30,7 @@ export const Search: FC<{ _prompt?: string }> = ({
           onChange={(e) => setPrompt(e.target.value)}
           autoFocus
           placeholder="Ask TLDR AI anything..."
-          className="px-2 pr-6 w-full rounded-md flex-1 outline-none bg-transparent text-white"
+          className="px-2 pr-6 w-full rounded-md flex-1 outline-none bg-transparent appearance-none text-white active:bg-transparent focus:bg-transparent"
         />
         <button
           type="submit"

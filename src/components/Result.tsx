@@ -1,9 +1,8 @@
-"use client";
 import { Answer } from "./Answer";
 import { Related } from "./Related";
 import { Sources } from "./Sources";
 import { Relate } from "../interfaces/relate";
-import { Source } from "../interfaces/Source";
+import { Source } from "../interfaces/source";
 import { parseStreaming } from "../utils/parse-streaming";
 import { FC, useEffect, useState } from "react";
 
@@ -30,7 +29,7 @@ export const Result: FC<{ query: string; rid: string }> = ({ query, rid }) => {
   return (
     <div className="flex flex-col gap-8">
       <Answer markdown={markdown} sources={sources} />
-      <Sources sources={sources}></Sources>
+      <Sources sources={sources} />
       <Related relates={relates} />
       {error && (
         <div className="absolute inset-4 flex items-center justify-center  backdrop-blur-sm">

@@ -19,6 +19,7 @@ from leptonai.kv import KV
 from leptonai.photon import Photon, StaticFiles
 from leptonai.photon.types import to_bool
 from leptonai.util import tool
+from tools import tools
 
 ################################################################################
 # Constant values for the RAG model.
@@ -92,201 +93,6 @@ Here are the contexts of the question:
 Remember, based on the original question and related contexts, suggest three such further questions. Do NOT repeat the original question. Each related question should be no longer than 20 words. Here is the original question:
 """
 
-
-def search_with_bing(query: str, subscription_key: str):
-    """
-    Search with bing and return the contexts.
-    """
-    params = {"q": query, "mkt": BING_MKT}
-    response = requests.get(
-        BING_SEARCH_V7_ENDPOINT,
-        headers={"Ocp-Apim-Subscription-Key": subscription_key},
-        params=params,
-        timeout=DEFAULT_SEARCH_ENGINE_TIMEOUT,
-    )
-    if not response.ok:
-        logger.error(f"{response.status_code} {response.text}")
-        raise HTTPException(response.status_code, "Search engine error.")
-    json_content = response.json()
-    try:
-        contexts = json_content["webPages"]["value"][:REFERENCE_COUNT]
-    except KeyError:
-        logger.error(f"Error encountered: {json_content}")
-        return []
-    return contexts
-
-
-def search_with_google(query: str, subscription_key: str, cx: str):
-    """
-    Search with google and return the contexts.
-    """
-    params = {
-        "key": subscription_key,
-        "cx": cx,
-        "q": query,
-        "num": REFERENCE_COUNT,
-    }
-    response = requests.get(
-        GOOGLE_SEARCH_ENDPOINT, params=params, timeout=DEFAULT_SEARCH_ENGINE_TIMEOUT
-    )
-    if not response.ok:
-        logger.error(f"{response.status_code} {response.text}")
-        raise HTTPException(response.status_code, "Search engine error.")
-    json_content = response.json()
-    try:
-        contexts = json_content["items"][:REFERENCE_COUNT]
-    except KeyError:
-        logger.error(f"Error encountered: {json_content}")
-        return []
-    return contexts
-
-
-def search_with_serper(query: str, subscription_key: str):
-    """
-    Search with serper and return the contexts.
-    """
-    payload = json.dumps({
-        "q": query,
-        "num": (
-            REFERENCE_COUNT
-            if REFERENCE_COUNT % 10 == 0
-            else (REFERENCE_COUNT // 10 + 1) * 10
-        ),
-    })
-    headers = {"X-API-KEY": subscription_key, "Content-Type": "application/json"}
-    logger.info(
-        f"{payload} {headers} {subscription_key} {query} {SERPER_SEARCH_ENDPOINT}"
-    )
-    response = requests.post(
-        SERPER_SEARCH_ENDPOINT,
-        headers=headers,
-        data=payload,
-        timeout=DEFAULT_SEARCH_ENGINE_TIMEOUT,
-    )
-    if not response.ok:
-        logger.error(f"{response.status_code} {response.text}")
-        raise HTTPException(response.status_code, "Search engine error.")
-    json_content = response.json()
-    try:
-        # convert to the same format as bing/google
-        contexts = []
-        if json_content.get("knowledgeGraph"):
-            url = json_content["knowledgeGraph"].get("descriptionUrl") or json_content["knowledgeGraph"].get("website")
-            snippet = json_content["knowledgeGraph"].get("description")
-            if url and snippet:
-                contexts.append({
-                    "name": json_content["knowledgeGraph"].get("title",""),
-                    "url": url,
-                    "snippet": snippet
-                })
-        if json_content.get("answerBox"):
-            url = json_content["answerBox"].get("url")
-            snippet = json_content["answerBox"].get("snippet") or json_content["answerBox"].get("answer")
-            if url and snippet:
-                contexts.append({
-                    "name": json_content["answerBox"].get("title",""),
-                    "url": url,
-                    "snippet": snippet
-                })
-        contexts += [
-            {"name": c["title"], "url": c["link"], "snippet": c.get("snippet","")}
-            for c in json_content["organic"]
-        ]
-        return contexts[:REFERENCE_COUNT]
-    except KeyError:
-        logger.error(f"Error encountered: {json_content}")
-        return []
-
-def search_with_searchapi(query: str, subscription_key: str):
-    """
-    Search with SearchApi.io and return the contexts.
-    """
-    payload = {
-        "q": query,
-        "engine": "google",
-        "num": (
-            REFERENCE_COUNT
-            if REFERENCE_COUNT % 10 == 0
-            else (REFERENCE_COUNT // 10 + 1) * 10
-        ),
-    }
-    headers = {"Authorization": f"Bearer {subscription_key}", "Content-Type": "application/json"}
-    logger.info(
-        f"{payload} {headers} {subscription_key} {query} {SEARCHAPI_SEARCH_ENDPOINT}"
-    )
-    response = requests.get(
-        SEARCHAPI_SEARCH_ENDPOINT,
-        headers=headers,
-        params=payload,
-        timeout=30,
-    )
-    if not response.ok:
-        logger.error(f"{response.status_code} {response.text}")
-        raise HTTPException(response.status_code, "Search engine error.")
-    json_content = response.json()
-    try:
-        # convert to the same format as bing/google
-        contexts = []
-
-        if json_content.get("answer_box"):
-            if json_content["answer_box"].get("organic_result"):
-                title = json_content["answer_box"].get("organic_result").get("title", "")
-                url = json_content["answer_box"].get("organic_result").get("link", "")
-            if json_content["answer_box"].get("type") == "population_graph":
-                title = json_content["answer_box"].get("place", "")
-                url = json_content["answer_box"].get("explore_more_link", "")
-
-            title = json_content["answer_box"].get("title", "")
-            url = json_content["answer_box"].get("link")
-            snippet =  json_content["answer_box"].get("answer") or json_content["answer_box"].get("snippet")
-
-            if url and snippet:
-                contexts.append({
-                    "name": title,
-                    "url": url,
-                    "snippet": snippet
-                })
-
-        if json_content.get("knowledge_graph"):
-            if json_content["knowledge_graph"].get("source"):
-                url = json_content["knowledge_graph"].get("source").get("link", "")
-
-            url = json_content["knowledge_graph"].get("website", "")
-            snippet = json_content["knowledge_graph"].get("description")
-
-            if url and snippet:
-                contexts.append({
-                    "name": json_content["knowledge_graph"].get("title", ""),
-                    "url": url,
-                    "snippet": snippet
-                })
-
-        contexts += [
-            {"name": c["title"], "url": c["link"], "snippet": c.get("snippet", "")}
-            for c in json_content["organic_results"]
-        ]
-        
-        if json_content.get("related_questions"):
-            for question in json_content["related_questions"]:
-                if question.get("source"):
-                    url = question.get("source").get("link", "")
-                else:
-                    url = ""  
-                    
-                snippet = question.get("answer", "")
-
-                if url and snippet:
-                    contexts.append({
-                        "name": question.get("question", ""),
-                        "url": url,
-                        "snippet": snippet
-                    })
-
-        return contexts[:REFERENCE_COUNT]
-    except KeyError:
-        logger.error(f"Error encountered: {json_content}")
-        return []
-
 class RAG(Photon):
     """
     Retrieval-Augmented Generation Demo from Lepton AI.
@@ -333,16 +139,6 @@ class RAG(Photon):
         # Secrets you need to have: search api subscription key, and lepton
         # workspace token to query lepton's llama models.
         "secret": [
-            # If you use BING, you need to specify the subscription key. Otherwise
-            # it is not needed.
-            "BING_SEARCH_V7_SUBSCRIPTION_KEY",
-            # If you use GOOGLE, you need to specify the search api key. Note that
-            # you should also specify the cx in the env.
-            "GOOGLE_SEARCH_API_KEY",
-            # If you use Serper, you need to specify the search api key.
-            "SERPER_SEARCH_API_KEY",
-            # If you use SearchApi, you need to specify the search api key.
-            "SEARCHAPI_API_KEY",
             # You need to specify the workspace token to query lepton's LLM models.
             "LEPTON_WORKSPACE_TOKEN",
         ],
@@ -560,7 +356,8 @@ class RAG(Photon):
 
                 return StreamingResponse(str_to_generator(result))
             except KeyError:
-                logger.info(f"Key {search_uuid} not found, will generate again.")
+                # do nothing
+                pass
             except Exception as e:
                 logger.error(
                     f"KV error: {e}\n{traceback.format_exc()}, will generate again."
@@ -600,6 +397,7 @@ class RAG(Photon):
                 stop=stop_words,
                 stream=True,
                 temperature=0.9,
+                tools=tools
             )
             if self.should_do_related_questions and generate_related_questions:
                 # While the answer is being generated, we can start generating
@@ -624,12 +422,6 @@ class RAG(Photon):
     def ui(self):
         return StaticFiles(directory="dist/")
 
-    @Photon.handler(method="GET", path="/")
-    def index(self) -> RedirectResponse:
-        """
-        Redirects "/" to the ui page.
-        """
-        return RedirectResponse(url="/dist/index.html")
 
 
 if __name__ == "__main__":

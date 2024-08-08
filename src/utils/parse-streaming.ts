@@ -18,7 +18,7 @@ export const parseStreaming = async (
   let chunks = "";
   let sourcesEmitted = false;
   const response = await fetch(
-    `https://n2bifuff-search-with-lepton-v2.tin.lepton.run/query`,
+    `http://localhost:8080/query`,
     {
       method: "POST",
       headers: {

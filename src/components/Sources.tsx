@@ -11,11 +11,11 @@ const SourceItem: FC<{ source: Source; index: number }> = ({
   const domain = new URL(url).hostname;
   return (
     <div
-      className="relative text-xs py-3 px-3 bg-zinc-100 hover:bg-zinc-200 rounded-lg flex flex-col gap-2"
+      className="relative text-xs py-3 px-3 bg-[#252525]  hover:bg-[#353535] rounded-lg flex flex-col gap-2"
       key={id}
     >
       <a href={url} target="_blank" className="absolute inset-0"></a>
-      <div className="font-medium text-zinc-950 text-ellipsis overflow-hidden whitespace-nowrap break-words">
+      <div className="font-medium text-ellipsis overflow-hidden whitespace-nowrap break-words">
         {name}
       </div>
       <div className="flex gap-2 items-center">
@@ -48,14 +48,14 @@ export const Sources: FC<{ sources: Source[] }> = ({ sources }) => {
                 key={item.id}
                 index={index}
                 source={item}
-              ></SourceItem>
+              />
             ))
           ) : (
             <>
-              <Skeleton className="max-w-sm h-16 bg-[#222]"></Skeleton>
-              <Skeleton className="max-w-sm h-16 bg-[#222]"></Skeleton>
-              <Skeleton className="max-w-sm h-16 bg-[#222]"></Skeleton>
-              <Skeleton className="max-w-sm h-16 bg-[#222]"></Skeleton>
+              <Skeleton className="max-w-sm h-16 bg-[#222]"/>
+              <Skeleton className="max-w-sm h-16 bg-[#222]"/>
+              <Skeleton className="max-w-sm h-16 bg-[#222]"/>
+              <Skeleton className="max-w-sm h-16 bg-[#222]"/>
             </>
           )}
         </div>

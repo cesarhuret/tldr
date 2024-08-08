@@ -2,7 +2,7 @@ import { FC } from "react";
 
 export const Footer: FC = () => {
   return (
-    <div className="text-center flex flex-col items-center text-xs text-zinc-700 gap-1">
+    <div className="text-center flex flex-col items-center text-xs text-zinc-700 gap-2">
       <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-2 mt-2 text-zinc-400">
         <div className="text-zinc-400">TLDR 🤝 Lepton</div>
         <a
@@ -27,6 +27,10 @@ export const Footer: FC = () => {
           GitHub
         </a>
       </div>
+      <div className="text-zinc-400">
+        TLDR AI does not give financial advice and can make mistakes.
+        Use at your own risk.
+        </div>
     </div>
   );
 };

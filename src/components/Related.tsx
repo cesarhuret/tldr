@@ -2,7 +2,7 @@ import { PresetQuery } from "./PresetQuery";
 import { Skeleton } from "./Skeleton";
 import { Wrapper } from "./Wrapper";
 import { Relate } from "../interfaces/relate";
-import React, { FC } from "react";
+import { FC } from "react";
 
 export const Related: FC<{ relates: Relate[] | null }> = ({ relates }) => {
   return (
@@ -20,9 +20,9 @@ export const Related: FC<{ relates: Relate[] | null }> = ({ relates }) => {
             )
           ) : (
             <>
-              <Skeleton className="w-full h-5 bg-[#222]"></Skeleton>
-              <Skeleton className="w-full h-5 bg-[#222]"></Skeleton>
-              <Skeleton className="w-full h-5 bg-[#222]"></Skeleton>
+              <Skeleton className="w-full h-5 bg-[#222]"/>
+              <Skeleton className="w-full h-5 bg-[#222]"/>
+              <Skeleton className="w-full h-5 bg-[#222]"/>
             </>
           )}
         </div>
