@@ -8,31 +8,45 @@
   font-weight: 400;
 
   color: #fff;
-  background-color:#101010;
+  background-color: #101010;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --privy-border-radius-sm: '0px';
-  --privy-border-radius-md: '0px!important';
-  --privy-border-radius-mdlg: '0px!important';
-  --privy-border-radius-lg: '0px!important';
-  --privy-border-radius-full: '0px';
-  --privy-color-background: '#000!important';
-  --privy-color-background-2: '#000';
-  --privy-color-foreground: '#000';
-  --privy-color-foreground-2: '#fff';
-  --privy-color-foreground-3: '#fff';
-  --privy-color-foreground-4: '#fff';
-  --privy-color-foreground-accent: '#fff';
-  --privy-color-accent: '#fff!important';
-  --privy-color-accent-light: '#fff!important';
-  --privy-color-accent-dark: '#fff!important';
-  --privy-color-success: 'your-custom-value';
-  --privy-color-error: 'your-custom-value';
-  --privy-color-error-light: 'your-custom-value';
+  --privy-border-radius-sm: "0px";
+  --privy-border-radius-md: "0px!important";
+  --privy-border-radius-mdlg: "0px!important";
+  --privy-border-radius-lg: "0px!important";
+  --privy-border-radius-full: "0px";
+  --privy-color-background: "#000!important";
+  --privy-color-background-2: "#000";
+  --privy-color-foreground: "#000";
+  --privy-color-foreground-2: "#fff";
+  --privy-color-foreground-3: "#fff";
+  --privy-color-foreground-4: "#fff";
+  --privy-color-foreground-accent: "#fff";
+  --privy-color-accent: "#fff!important";
+  --privy-color-accent-light: "#fff!important";
+  --privy-color-accent-dark: "#fff!important";
+  --privy-color-success: "your-custom-value";
+  --privy-color-error: "your-custom-value";
+  --privy-color-error-light: "your-custom-value";
+}
 
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #151515;
+  border-radius: 10px;
+  border-block: 20px solid transparent;
+  background-clip: padding-box;
 }
 
 a {
@@ -56,7 +70,6 @@ h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
-
 
 @media (prefers-color-scheme: light) {
   :root {

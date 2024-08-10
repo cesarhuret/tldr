@@ -19,7 +19,6 @@ from leptonai.kv import KV
 from leptonai.photon import Photon, StaticFiles
 from leptonai.photon.types import to_bool
 from leptonai.util import tool
-from tools import tools
 
 ################################################################################
 # Constant values for the RAG model.
@@ -42,18 +41,18 @@ DEFAULT_SEARCH_ENGINE_TIMEOUT = 5
 
 
 # If the user did not provide a query, we will use this default query.
-_default_query = "Who said 'live long and prosper'?"
+_default_query = "What's the best place to earn interest in crypto?"
 
 # This is really the most important part of the rag model. It gives instructions
 # to the model on how to generate the answer. Of course, different models may
 # behave differently, and we haven't tuned the prompt to make it optimal - this
 # is left to you, application creators, as an open problem.
 _rag_query_text = """
-You are an AI assistant built by Heurist AI. You are given a user question, and please write clean, concise and accurate answer to the question. You will be given a set of related contexts to the question, each starting with a reference number like [[citation:x]], where x is a number. Please use the context and cite the context at the end of each sentence if applicable.
+You are an AI assistant called TLDR AI, built by Librarie, designed to help onboard people into crypto for a better and decentralized world. You are given a user question, and please write a concise and accurate answer to the question. You will be given a set of related contexts to the question.
 
-Your answer must be correct, accurate and written by an expert using an unbiased and professional tone. Please limit to 1024 tokens. Do not give any information that is not related to the question, and do not repeat. Say "information is missing on" followed by the related topic, if the given context do not provide sufficient information.
+Your answer must be correct and written by an expert using an unbiased and professional tone. Please limit to 1024 tokens.
 
-Please cite the contexts with the reference numbers, in the format [citation:x]. If a sentence comes from multiple contexts, please list all applicable citations, like [citation:3][citation:5]. Other than code and specific names and citations, your answer must be written in the same language as the question.
+Do not give any information that is not related to the question, and do not repeat content, especially in lists and instructions. Say "information is missing on" followed by the related topic, if the given context do not provide sufficient information.
 
 Here are the set of contexts:
 
@@ -84,14 +83,176 @@ stop_words = [
 # questions. This is not ideal, but it is a good tradeoff between response time
 # and quality.
 _more_questions_prompt = """
-You are a helpful assistant that helps the user to ask related questions, based on user's original question and the related contexts. Please identify worthwhile topics that can be follow-ups, and write questions no longer than 20 words each. Please make sure that specifics, like events, names, locations, are included in follow up questions so they can be asked standalone. For example, if the original question asks about "the Manhattan project", in the follow up question, do not just say "the project", but use the full name "the Manhattan project". Your related questions must be in the same language as the original question.
+You are a helpful assistant that helps the user to ask related questions about learning about using crypto protocols (not as much how they work), based on user's original question and the related contexts. Please identify worthwhile topics that can be follow-ups, and write questions no longer than 20 words each. Please make sure that specifics, like crypto events, crypto company names, and crypto twitter celebrities are included in follow up questions so they can be asked standalone. For example, if the original question asks about "the Euler hack", in the follow up question, do not just say "the hack", but use the full name "the Euler hack". Your related questions must be in the same language as the original question.
 
 Here are the contexts of the question:
 
 {context}
 
-Remember, based on the original question and related contexts, suggest three such further questions. Do NOT repeat the original question. Each related question should be no longer than 20 words. Here is the original question:
+Remember, based on the original question and related contexts, suggest five such further questions. Do NOT repeat the original question, and NEVER include the answer as another question. Each related question should be no longer than 20 words. Here is the original question:
 """
+
+################################################################################
+# Tools for inference and function calls.
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_best_protocol",
+            "description": "Get the best matched protocol to use based on the category, chain, and the description of the protocol.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "chain": {
+                        "type": "string",
+                        "description": "The name of the blockchain to get the protocols for.",
+                    },
+                    "category": {
+                        "type": "string", 
+                        "enum": [
+                            "Liquid Staking",
+                            "Lending",
+                            "Bridge",
+                            "Dexes",
+                            "Restaking",
+                            "Liquid Restaking",
+                            "CDP",
+                            "RWA",
+                            "Yield",
+                            "Farm",
+                            "Derivatives",
+                            "Basis Trading",
+                            "Yield Aggregator",
+                            "Services",
+                            "Cross Chain",
+                            "Launchpad",
+                            "Leveraged Farming",
+                            "Privacy",
+                            "Indexes",
+                            "Staking Pool",
+                            "Payments",
+                            "Liquidity Manager",
+                            "Synthetics",
+                            "Insurance",
+                            "Options",
+                            "Decentralized Stablecoin",
+                            "Prediction Market",
+                            "NFT Marketplace",
+                            "Algo-Stables",
+                            "NFT Lending",
+                            "Options Vault",
+                            "Uncollateralized Lending",
+                            "Reserve Currency",
+                            "SoFi",
+                            "DEX Aggregator",
+                            "RWA Lending",
+                            "Gaming",
+                            "NftFi",
+                            "Ponzi",
+                            "CeDeFi",
+                            "Oracle",
+                            "Wallets",
+                            "Telegram Bots",
+                            "MEV"
+                        ]
+                    },
+            },
+            "required": ["category"],
+            },
+        },   
+    }
+]
+
+def search_with_llama(client: any, data: any, message: str):
+    """
+    Search with DefiLlama and return the contexts.
+    """
+    return get_response(client, data, message)
+
+
+def get_response(client: any, data: List[any], message: str):
+    """
+    Gets the response for a query.
+    """
+
+    # since we cannot use function calling, we will have to manually ask the model to identify arguments
+    # and then use the arguments to call the function to get the best protocol
+    messages = [
+        {"role": "system", "content": f"""
+         You are an assistant that generates JSON. You always return just the JSON with no additional description or context.
+
+         Example: 
+         {{
+            "chain": "Ethereum",
+            "category": "Bridge"
+         }}
+         
+         Based on the user's query, return the arguments needed to call the function that returns a list of protocols relevant to the user query.
+         The function follows OpenAI's function tool specification.
+         
+         Here it is:
+
+         {tools[0]}
+         """},
+        {"role": "user", "content": message},
+    ]
+
+    res = client.chat.completions.create(
+        model="mistralai/mixtral-8x7b-instruct-v0.1",
+        messages=messages,
+        max_tokens=256,
+        stop=stop_words,
+        stream=False,
+        temperature=0.9,
+        # tools=tools,
+    )
+
+    res = json.loads(res.choices[0].message.content)
+
+    logger.info(f"Querying DefiLlama... Chain: {res['chain']} Category: {res['category']}")
+
+    protocols = get_list_of_protocols(data, res['chain'], res['category'])
+
+    return protocols
+    
+def get_list_of_protocols(data: List[any], chain: str, category: str):
+    """
+    Read from local DefiLlama data.
+    """
+
+    protocols = []
+
+    for protocol in data:
+        if protocol is None:
+            continue
+
+        if 'chain' in protocol and 'category' in protocol:
+            if (chain in protocol["chain"] or chain in protocol["chains"]) and category in protocol["category"]:
+                protocols.append(protocol)
+        else:
+            continue
+
+    protocols = sorted(protocols, key=lambda x: x["tvl"], reverse=True)
+
+    return protocols[:5]
+
+def search_for_tx(query: str):
+    """
+    Get the transaction from the Heurist AI's OpenAI Client & Etherscan & Alchemy/Tenderly Transaction Simulation.
+    """
+    pass
+
+def get_erc20_tx(token: str, amount: float, slippage: float, deadline: int, recipient: str):
+    """
+    Buy ERC20 token with the specified amount, slippage, deadline and recipient.
+    """
+    pass
+
+def get_nft_tx():
+    """
+    Buy an NFT.
+    """
+    pass
 
 class RAG(Photon):
     """
@@ -107,7 +268,10 @@ class RAG(Photon):
         "openai",  # for openai client usage.
     ]
 
-    extra_files = glob.glob("dist/**/*", recursive=True)
+    extra_files = [
+        *glob.glob("dist/**/*", recursive=True),
+        "search/protocols.json"
+    ]
 
     deployment_template = {
         # All actual computations are carried out via remote apis, so
@@ -116,15 +280,6 @@ class RAG(Photon):
         "resource_shape": "cpu.small",
         # You most likely don't need to change this.
         "env": {
-            # Choose the backend. Currently, we support BING and GOOGLE. For
-            # simplicity, in this demo, if you specify the backend as LEPTON,
-            # we will use the hosted serverless version of lepton search api
-            # at https://search-api.lepton.run/ to do the search and RAG, which
-            # runs the same code (slightly modified and might contain improvements)
-            # as this demo.
-            "BACKEND": "LEPTON",
-            # If you are using google, specify the search cx.
-            "GOOGLE_SEARCH_CX": "",
             # Specify the LLM model you are going to use.
             "LLM_MODEL": "mixtral-8x7b",
             # For all the search queries and results, we will use the Lepton KV to
@@ -195,17 +350,6 @@ class RAG(Photon):
         Initializes photon configs.
         """
         # First, log in to the workspace.
-        self.backend = os.environ["BACKEND"].upper()
-
-        if self.backend == "LEPTON":
-            self.leptonsearch_client = Client(
-                "https://search-api.lepton.run/",
-                token=os.environ.get("LEPTON_WORKSPACE_TOKEN"),
-                stream=True,
-                timeout=httpx.Timeout(connect=10, read=120, write=120, pool=10),
-            )
-        else:
-            raise RuntimeError("Backend must be LEPTON, BING, GOOGLE, SERPER or SEARCHAPI.")
         self.model = os.environ["LLM_MODEL"]
         # An executor to carry out async tasks, such as uploading to KV.
         self.executor = concurrent.futures.ThreadPoolExecutor(
@@ -218,6 +362,11 @@ class RAG(Photon):
         )
         # whether we should generate related questions.
         self.should_do_related_questions = to_bool(os.environ["RELATED_QUESTIONS"])
+
+        with open("search/protocols.json", "r") as f:
+            file = f.read()
+            self.data = json.loads(file)
+
 
     def get_related_questions(self, query, contexts):
         """
@@ -247,7 +396,7 @@ class RAG(Photon):
                     {
                         "role": "system",
                         "content": _more_questions_prompt.format(
-                            context="\n\n".join([c["snippet"] for c in contexts])
+                            context="\n\n".join([json.dumps(c) for c in contexts])
                         ),
                     },
                     {
@@ -365,40 +514,43 @@ class RAG(Photon):
         else:
             raise HTTPException(status_code=400, detail="search_uuid must be provided.")
 
-        if self.backend == "LEPTON":
-            # delegate to the lepton search api.
-            result = self.leptonsearch_client.query(
-                query=query,
-                search_uuid=search_uuid,
-                generate_related_questions=generate_related_questions,
-            )
-            return StreamingResponse(content=result, media_type="text/html")
-
         # First, do a search query.
         query = query or _default_query
         # Basic attack protection: remove "[INST]" or "[/INST]" from the query
         query = re.sub(r"\[/?INST\]", "", query)
+        
+        client = self.local_heurist_client()
+
+        self.search_function = lambda query: search_with_llama(
+            client,
+            self.data,
+            query,
+        )
+        
+        # Search function is just asking Heurist AI's OpenAI Client for function calls via tools
         contexts = self.search_function(query)
 
         system_prompt = _rag_query_text.format(
             context="\n\n".join(
-                [f"[[citation:{i+1}]] {c['snippet']}" for i, c in enumerate(contexts)]
+                [f"{c}" for _, c in enumerate(contexts)]
             )
         )
+
         try:
-            client = self.local_heurist_client()
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": query},
+            ]
+
             llm_response = client.chat.completions.create(
                 model="mistralai/mixtral-8x7b-instruct-v0.1",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": query},
-                ],
+                messages=messages,
                 max_tokens=1024,
                 stop=stop_words,
                 stream=True,
                 temperature=0.9,
-                tools=tools
             )
+
             if self.should_do_related_questions and generate_related_questions:
                 # While the answer is being generated, we can start generating
                 # related questions as a future.
@@ -421,8 +573,6 @@ class RAG(Photon):
     @Photon.handler(mount=True)
     def ui(self):
         return StaticFiles(directory="dist/")
-
-
 
 if __name__ == "__main__":
     rag = RAG()

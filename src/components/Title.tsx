@@ -12,15 +12,24 @@ export const Title = ({ query }: { query: string }) => {
       >
         {query}
       </div>
-      <div className="flex-none">
+      <div className="flex flex-row">
         <button
           onClick={() => {
             navigate(getSearchUrl(encodeURIComponent(query), nanoid()));
           }}
           type="button"
-          className="rounded flex gap-2 items-center bg-transparent px-2 py-1 text-xs font-semibold text-gray-400 hover:bg-[#454545] transition-all"
+          className="rounded flex gap-2 items-center bg-transparent px-2 py-1 text-xs font-semibold text-gray-400 hover:text-[#fff] transition-all"
         >
-          Again?
+          Ask Again?
+        </button>
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(window.location.href);
+          }}
+          type="button"
+          className="rounded flex gap-2 items-center bg-transparent px-2 py-1 text-xs font-semibold text-gray-400 hover:text-[#fff] transition-all"
+        >
+          Share
         </button>
       </div>
     </div>

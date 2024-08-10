@@ -21,7 +21,7 @@ export const Search: FC<{ _prompt?: string }> = ({
       }}
     >
       <label
-        className="relative flex items-center justify-center border ring-zinc-300/20 py-2 px-2 rounded-lg gap-2 border-[#252525] shadow-[#0d0d0d] shadow-xl transition-all focus:scale-95"
+        className="relative flex items-center min-w-[600px] justify-center border bg-[#101010] ring-zinc-300/20 py-2 px-2 rounded-lg gap-2 border-[#252525] shadow-[#0d0d0d] shadow-xl transition-all focus:scale-95"
         htmlFor="search-bar"
       >
         <input
@@ -30,7 +30,7 @@ export const Search: FC<{ _prompt?: string }> = ({
           onChange={(e) => setPrompt(e.target.value)}
           autoFocus
           placeholder="Ask TLDR AI anything..."
-          className="px-2 pr-6 w-full rounded-md flex-1 outline-none bg-transparent appearance-none text-white active:bg-transparent focus:bg-transparent"
+          className="px-2 pr-6 w-full rounded-md flex-1 outline-none bg-inherit appearance-none text-white"
         />
         <button
           type="submit"

@@ -1,0 +1,50 @@
+[
+  {
+    "action": "erc20_transfer"
+  },
+  {
+    "action": "erc20_approve"
+  },
+  {
+    "action": "erc721_transfer"
+  },
+  {
+    "action": "erc721_approve"
+  },
+  {
+    "action": "erc721_set_approval_for_all"
+  },
+  {
+    "action": "erc1155_transfer"
+  },
+  {
+    "action": "erc1155_safe_transfer"
+  },
+  {
+    "action": "erc1155_safe_batch_transfer"
+  },
+  {
+    "action": "erc1155_set_approval_for_all"
+  },
+  {
+    "action": "erc1155_set_approval_for_all"
+  },
+  {
+    "action": "erc1155_safe_batch_transfer"
+  },
+  {
+    "action": "erc1155_safe_transfer"
+  },
+  {
+    "action": "erc1155_transfer"
+  },
+  {
+    "action": "erc721_set_approval_for_all"
+  },
+  {
+    "action": "erc4626"
+  },
+  {
+    "action": "beefy"
+  }
+]

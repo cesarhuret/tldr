@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Yield",
+    "description": "Earn rewards by depositing your crypto into a protocol.",
+    "subcategories": [
+      "Lending",
+      "Yield",
+      "Staking Pool",
+      "Vaults",
+      "Restaking",
+      "Liquid Staking",
+      "Farming"
+    ]
+  },
+  {
+    "name": "Bridge",
+    "description": "Transfer assets between different blockchain networks seamlessly."
+  },
+  {
+    "name": "CEXes",
+    "description": "Centralized cryptocurrency exchanges that facilitate trading between users.",
+    "aka": ["Centralized Exchanges", "Fiat Onramps"]
+  },
+  {
+    "name": "DEXes",
+    "description": "Trade cryptocurrencies directly with others without intermediaries.",
+    "aka": ["LP", "Liquidity Provision", "Liquidity Pools"]
+  },
+  {
+    "name": "Trading",
+    "description": "Trade cryptocurrencies directly with others without intermediaries.",
+    "aka": [
+      "DEXes",
+      "Perps",
+      "Futures",
+      "Options",
+      "Derivatives",
+      "Leverage",
+      "Basis Trading"
+    ]
+  },
+  {
+    "name": "NFTs",
+    "description": "Unique digital assets that represent ownership of a specific item or piece of content.",
+    "aka": ["NFT Marketplace", "NFT Lending", "NftFi"]
+  },
+  {
+    "name": "Gaming",
+    "description": "Integration of blockchain technology into video games.",
+    "aka": ["Play to Earn", "GameFi", "NFT Gaming", "Metaverse"]
+  },
+  {
+    "name": "Prediction Markets",
+    "description": "Platforms to bet on the outcome of future events."
+  },
+  {
+    "name": "Payments",
+    "description": "Send and receive digital assets as a form of payment."
+  },
+  {
+    "name": "SoFi",
+    "description": "SoFi is social finance, enabling users to view and copy each other's onchain actions."
+  },
+  {
+    "name": "RWA",
+    "description": "Digital representation and financial tools for real world assets like real estate or commodities."
+  },
+  {
+    "name": "Wallets",
+    "description": "Software applications or hardware devices to securely store and manage cryptocurrency assets."
+  }
+]

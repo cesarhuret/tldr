@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Ethereum",
+    "description": "Ethereum is the community-run technology powering the cryptocurrency ether (ETH) and thousands of decentralized applications. Good for DeFi, NFTs and most bluechip activity. Can be more gas expensive"
+  },
+  {
+    "name": "Optimism",
+    "description": "Optimism started as a single L2 chain and evolved into the largest and fastest growing ecosystem with a mission to scale Ethereum's technology and values."
+  },
+  {
+    "name": "Arbitrum",
+    "description": "Arbitrum is a layer 2 scaling solution for Ethereum that aims to provide low fees and fast transactions. Most popular for DeFi and trading."
+  },
+  {
+    "name": "Polygon",
+    "description": "Originally a sidechain, Polygon is a layer 2 scaling solution for Ethereum that aims to provide low fees and fast transactions. Good for gaming and NFTs."
+  },
+  {
+    "name": "Blast",
+    "description": "Blast is a layer 2 scaling solution for Ethereum that aims to provide low fees and fast transactions. Backed by Paradigm and good for gaming."
+  },
+  {
+    "name": "Mode",
+    "description": "Mode is the DeFi layer 2 part of the Superchain. Built using the OP Stack, it ensures EVM compatibility, making it seamless for developers familiar with Ethereum. Our ecosystem focuses on onchain finance and innovations in decentralized finance (DeFi). As a layer 2, Mode operates with exceptionally low fees, allowing users to experiment and innovate freely on our chain."
+  }
+]
