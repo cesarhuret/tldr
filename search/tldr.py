@@ -19,17 +19,14 @@ from leptonai.kv import KV
 from leptonai.photon import Photon, StaticFiles
 from leptonai.photon.types import to_bool
 from leptonai.util import tool
+from datetime import datetime
 
 ################################################################################
 # Constant values for the RAG model.
 ################################################################################
 
 # Search engine related. You don't really need to change this.
-BING_SEARCH_V7_ENDPOINT = "https://api.bing.microsoft.com/v7.0/search"
-BING_MKT = "en-US"
-GOOGLE_SEARCH_ENDPOINT = "https://customsearch.googleapis.com/customsearch/v1"
-SERPER_SEARCH_ENDPOINT = "https://google.serper.dev/search"
-SEARCHAPI_SEARCH_ENDPOINT = "https://www.searchapi.io/api/v1/search"
+TWITTER_API_SEARCH="https://api.twitter.com/2/tweets/search/recent"
 
 # Specify the number of references from the search engine you want to use.
 # 8 is usually a good number.
@@ -39,7 +36,6 @@ REFERENCE_COUNT = 8
 # does not respond within this time, we will return an error.
 DEFAULT_SEARCH_ENGINE_TIMEOUT = 5
 
-
 # If the user did not provide a query, we will use this default query.
 _default_query = "What's the best place to earn interest in crypto?"
 
@@ -48,7 +44,7 @@ _default_query = "What's the best place to earn interest in crypto?"
 # behave differently, and we haven't tuned the prompt to make it optimal - this
 # is left to you, application creators, as an open problem.
 _rag_query_text = """
-You are an AI assistant called TLDR AI, built by Librarie, designed to help onboard people into crypto for a better and decentralized world. You are given a user question, and please write a concise and accurate answer to the question. You will be given a set of related contexts to the question.
+You are an AI assistant called TLDR AI, designed to help onboard people into crypto for a better and decentralized world. You are given a user question, and please write a concise and accurate answer to the question. You will be given a set of related contexts to the question.
 
 Your answer must be correct and written by an expert using an unbiased and professional tone. Please limit to 1024 tokens.
 
@@ -92,87 +88,9 @@ Here are the contexts of the question:
 Remember, based on the original question and related contexts, suggest five such further questions. Do NOT repeat the original question, and NEVER include the answer as another question. Each related question should be no longer than 20 words. Here is the original question:
 """
 
-################################################################################
-# Tools for inference and function calls.
-tools = [
-    {
-        "type": "function",
-        "function": {
-            "name": "get_best_protocol",
-            "description": "Get the best matched protocol to use based on the category, chain, and the description of the protocol.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "chain": {
-                        "type": "string",
-                        "description": "The name of the blockchain to get the protocols for.",
-                    },
-                    "category": {
-                        "type": "string", 
-                        "enum": [
-                            "Liquid Staking",
-                            "Lending",
-                            "Bridge",
-                            "Dexes",
-                            "Restaking",
-                            "Liquid Restaking",
-                            "CDP",
-                            "RWA",
-                            "Yield",
-                            "Farm",
-                            "Derivatives",
-                            "Basis Trading",
-                            "Yield Aggregator",
-                            "Services",
-                            "Cross Chain",
-                            "Launchpad",
-                            "Leveraged Farming",
-                            "Privacy",
-                            "Indexes",
-                            "Staking Pool",
-                            "Payments",
-                            "Liquidity Manager",
-                            "Synthetics",
-                            "Insurance",
-                            "Options",
-                            "Decentralized Stablecoin",
-                            "Prediction Market",
-                            "NFT Marketplace",
-                            "Algo-Stables",
-                            "NFT Lending",
-                            "Options Vault",
-                            "Uncollateralized Lending",
-                            "Reserve Currency",
-                            "SoFi",
-                            "DEX Aggregator",
-                            "RWA Lending",
-                            "Gaming",
-                            "NftFi",
-                            "Ponzi",
-                            "CeDeFi",
-                            "Oracle",
-                            "Wallets",
-                            "Telegram Bots",
-                            "MEV"
-                        ]
-                    },
-            },
-            "required": ["category"],
-            },
-        },   
-    }
-]
-
-def search_with_llama(client: any, data: any, message: str):
+def process_user_query(client: any, tools: any, data: any, message: str):
     """
-    Search with DefiLlama and return the contexts.
-    """
-    return get_response(client, data, message)
-
-
-def get_response(client: any, data: List[any], message: str):
-    """
-    Gets the response for a query.
+    Search for the best protocol based on the user query.
     """
 
     # since we cannot use function calling, we will have to manually ask the model to identify arguments
@@ -181,18 +99,33 @@ def get_response(client: any, data: List[any], message: str):
         {"role": "system", "content": f"""
          You are an assistant that generates JSON. You always return just the JSON with no additional description or context.
 
-         Example: 
+         Format:
          {{
-            "chain": "Ethereum",
-            "category": "Bridge"
+            "function": {{
+                "type": "string",
+                "description": "The function from the list of tools available to be used to get an answer for the user's query"
+            }},
+            "args": {{
+                "type": "object",
+                "description": "The arguments to be used for the function, fetched from the schema of the function tool."
+            }}
+         }}
+
+         Example:
+         {{
+            function: "get_best_protocol",
+            args: {{
+                "chain": "Ethereum",
+                "category": "Bridge"
+            }}
          }}
          
-         Based on the user's query, return the arguments needed to call the function that returns a list of protocols relevant to the user query.
-         The function follows OpenAI's function tool specification.
+         Based on the user's query, find the relevant function to be used, as well as the arguments for the function.
+         The functions follow OpenAI's function tool specification.
          
-         Here it is:
+         Here are the available tools:
 
-         {tools[0]}
+         {tools}
          """},
         {"role": "user", "content": message},
     ]
@@ -204,31 +137,50 @@ def get_response(client: any, data: List[any], message: str):
         stop=stop_words,
         stream=False,
         temperature=0.9,
-        # tools=tools,
     )
 
     res = json.loads(res.choices[0].message.content)
 
-    logger.info(f"Querying DefiLlama... Chain: {res['chain']} Category: {res['category']}")
+    logger.info(f"Querying... Function: {res['function']}, Args: {res['args']}")
 
-    protocols = get_list_of_protocols(data, res['chain'], res['category'])
+    if 'function' in res:
+        if res['function'] == "get_best_protocol":
+            return search_with_llama(data['protocols'], res['args'])
+        if res['function'] == "get_related_events":
+            return search_with_events(data['events'], res['args'])
+        if res['function'] == "get_best_yields":
+            return search_with_pools(data['protocols'], data['pools'], res['args'])
+        # if res['function'] == "get_twitter_posts":
+        #     return search_with_twitter(res['args'])
 
-    return protocols
-    
-def get_list_of_protocols(data: List[any], chain: str, category: str):
+    return []
+
+def search_with_llama(data: List[any], filter: any):
     """
     Read from local DefiLlama data.
     """
 
     protocols = []
 
+    if 'category' not in filter:
+        return []
+    
+    filterChain = True
+
+    if 'chain' not in filter:
+        filterChain = False
+
     for protocol in data:
         if protocol is None:
             continue
 
         if 'chain' in protocol and 'category' in protocol:
-            if (chain in protocol["chain"] or chain in protocol["chains"]) and category in protocol["category"]:
-                protocols.append(protocol)
+            if filter['category'] in protocol["category"]:
+                if(filterChain):
+                    if (filter['chain'] in protocol["chain"] or filter['chain'] in protocol["chains"]):
+                        protocols.append(protocol)
+                else:
+                    protocols.append(protocol)
         else:
             continue
 
@@ -236,23 +188,106 @@ def get_list_of_protocols(data: List[any], chain: str, category: str):
 
     return protocols[:5]
 
-def search_for_tx(query: str):
+def search_with_events(events: List[any], filter: any):
     """
-    Get the transaction from the Heurist AI's OpenAI Client & Etherscan & Alchemy/Tenderly Transaction Simulation.
+    Search for events based on the user query.
     """
-    pass
 
-def get_erc20_tx(token: str, amount: float, slippage: float, deadline: int, recipient: str):
-    """
-    Buy ERC20 token with the specified amount, slippage, deadline and recipient.
-    """
-    pass
+    results = []
 
-def get_nft_tx():
+    date_format = "%Y-%m-%d"
+    
+    startDate = None
+    if('startDate' in filter):
+        startDate = datetime.strptime(filter['startDate'])
+    
+    endDate = None
+    if('endDate' in filter):
+        endDate = datetime.strptime(filter['endDate'])
+
+    tags = None
+    if('tags' in filter):
+        tags = filter['tags']
+
+    topics = None
+    if('topics' in filter):
+        topics = filter['topics']
+
+    location = None
+    if('location' in filter):
+        location = filter['location']
+
+    for event in events:
+        if event is None:
+            continue
+
+        if startDate is not None:
+            if datetime.strptime(event["date"], date_format) < startDate:
+                continue
+            
+        if endDate is not None:
+            if datetime.strptime(event["date"], date_format) > endDate:
+                continue
+        
+        if tags is not None:
+            for tag in tags:
+                if tag not in event["tags"]:
+                    continue
+
+        if topics is not None:
+            for topic in topics:
+                if topic not in event["topics"]:
+                    continue
+        
+        if location is not None:
+            if location['country'] not in event['country']:
+                continue
+
+            if location['city'] not in event['city']:
+                continue
+
+        results.append(event)
+
+    return results[:5]
+
+def search_with_pools(protocols: List[any], pools: List[any], filter: any):
     """
-    Buy an NFT.
+    Search for the best pools based on the user query.
     """
-    pass
+
+    results = []
+
+    chain = "Mode"
+    if 'chain' in filter:
+        chain = filter['chain']
+
+    project = "ionic-protocol"
+    if 'project' in filter:
+        project = filter['project']
+
+    for pool in pools:
+        if pool is None:
+            continue
+
+        if 'chain' not in pool or 'project' not in pool:
+            continue
+
+        if chain not in pool["chain"]:
+            continue
+
+        if project not in pool["project"]:
+            continue
+        
+        for protocol in protocols: 
+            if pool['project'] == protocol['slug']:
+                pool['protocol'] = protocol
+                break
+
+        results.append(pool)
+
+    results = sorted(results, key=lambda x: x["apy"], reverse=True)
+
+    return results[:5]
 
 class RAG(Photon):
     """
@@ -266,6 +301,7 @@ class RAG(Photon):
 
     requirement_dependency = [
         "openai",  # for openai client usage.
+        "tweepy"
     ]
 
     extra_files = [
@@ -298,6 +334,8 @@ class RAG(Photon):
             "LEPTON_WORKSPACE_TOKEN",
         ],
     }
+
+    data = {}
 
     # It's just a bunch of api calls, so our own deployment can be made massively
     # concurrent.
@@ -365,8 +403,19 @@ class RAG(Photon):
 
         with open("search/protocols.json", "r") as f:
             file = f.read()
-            self.data = json.loads(file)
+            self.data['protocols'] = json.loads(file)
 
+        with open("search/tools.json", "r") as f:
+            file = f.read()
+            self.tools = file
+
+        with open("search/events.json", "r") as f:
+            file = f.read()
+            self.data['events'] = json.loads(file)
+
+        with open("search/pools.json", "r") as f:
+            file = f.read()
+            self.data['pools'] = json.loads(file)
 
     def get_related_questions(self, query, contexts):
         """
@@ -521,14 +570,17 @@ class RAG(Photon):
         
         client = self.local_heurist_client()
 
-        self.search_function = lambda query: search_with_llama(
+        self.search_function = lambda query: process_user_query(
             client,
+            self.tools,
             self.data,
             query,
         )
         
         # Search function is just asking Heurist AI's OpenAI Client for function calls via tools
         contexts = self.search_function(query)
+
+        print(contexts)
 
         system_prompt = _rag_query_text.format(
             context="\n\n".join(
@@ -550,6 +602,7 @@ class RAG(Photon):
                 stream=True,
                 temperature=0.9,
             )
+
 
             if self.should_do_related_questions and generate_related_questions:
                 # While the answer is being generated, we can start generating

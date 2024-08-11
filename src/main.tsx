@@ -28,7 +28,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           theme: "#fff",
           accentColor: "#fff",
           logo: "https://pub-dc971f65d0aa41d18c1839f8ab426dcb.r2.dev/privy.png",
-          walletList: ["coinbase_wallet"],
+          walletList: [
+            "coinbase_wallet",
+            "metamask",
+            "rainbow",
+            "rabby_wallet",
+          ],
         },
         // Create embedded wallets for users who don't have a wallet
         embeddedWallets: {

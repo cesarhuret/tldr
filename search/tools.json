@@ -1,0 +1,173 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "get_best_protocol",
+      "description": "Get the best matched protocol to use based on the category, chain, and the description of the protocol.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chain": {
+            "type": "string",
+            "description": "The name of the blockchain to get the protocols for.",
+            "enum": [
+              "Ethereum",
+              "Base",
+              "Optimism",
+              "Arbitrum",
+              "Polygon",
+              "Blast",
+              "Mode",
+              "ZKSync Era",
+              "Avalanche",
+              "TON",
+              "Binance"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "Liquid Staking",
+              "Lending",
+              "Bridge",
+              "Dexes",
+              "Restaking",
+              "Liquid Restaking",
+              "CDP",
+              "RWA",
+              "Yield",
+              "Farm",
+              "Derivatives",
+              "Basis Trading",
+              "Yield Aggregator",
+              "Services",
+              "Cross Chain",
+              "Launchpad",
+              "Leveraged Farming",
+              "Privacy",
+              "Indexes",
+              "Staking Pool",
+              "Payments",
+              "Liquidity Manager",
+              "Synthetics",
+              "Insurance",
+              "Options",
+              "Decentralized Stablecoin",
+              "Prediction Market",
+              "NFT Marketplace",
+              "Algo-Stables",
+              "NFT Lending",
+              "Options Vault",
+              "Uncollateralized Lending",
+              "Reserve Currency",
+              "SoFi",
+              "DEX Aggregator",
+              "RWA Lending",
+              "Gaming",
+              "NftFi",
+              "Ponzi",
+              "CeDeFi",
+              "Oracle",
+              "Wallets",
+              "Telegram Bots",
+              "MEV"
+            ]
+          }
+        },
+        "required": ["category"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_related_events",
+      "description": "Get the best matched event to use based on the location, time, description, tags and topics of the event.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "description": "The start date of the event in 'YYYY-MM-DD' format"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "The end date of the event in 'YYYY-MM-DD' format"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "region": {
+                "type": "string"
+              },
+              "country": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_best_yields",
+      "description": "Get the best pools to deposit tokens into so that users can earn tokens. If a user asks where to earn the most yield, this function will return the best pools to deposit tokens into.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chain": {
+            "type": "string",
+            "description": "The name of the blockchain to get the pool for.",
+            "enum": [
+              "Ethereum",
+              "Base",
+              "Optimism",
+              "Arbitrum",
+              "Polygon",
+              "Blast",
+              "Mode",
+              "ZKSync Era"
+            ]
+          },
+          "project": {
+            "type": "string",
+            "description": "The name of the project to get the pools for. Defaults to exactly 'ionic-protocol' "
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "get_twitter_posts",
+      "description": "Get a set of twitter posts related and used to answer the user query.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The query to search for in the twitter search - built by using Twitter's Standard Search Operators."
+          }
+        }
+      }
+    }
+  }
+]

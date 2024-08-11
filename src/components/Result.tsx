@@ -5,9 +5,12 @@ import { Relate } from "../interfaces/relate";
 import { Source } from "../interfaces/source";
 import { parseStreaming } from "../utils/parse-streaming";
 import { FC, useEffect, useState } from "react";
+import { Action } from "../interfaces/action";
+import { Actions } from "./Actions";
 
 export const Result: FC<{ query: string; rid: string }> = ({ query, rid }) => {
   const [sources, setSources] = useState<Source[]>([]);
+  const [actions, setActions] = useState<Action[]>([]);
   const [markdown, setMarkdown] = useState<string>("");
   const [relates, setRelates] = useState<Relate[] | null>(null);
   const [error, setError] = useState<number | null>(null);
@@ -18,6 +21,7 @@ export const Result: FC<{ query: string; rid: string }> = ({ query, rid }) => {
       query,
       rid,
       setSources,
+      setActions,
       setMarkdown,
       setRelates,
       setError
@@ -29,7 +33,8 @@ export const Result: FC<{ query: string; rid: string }> = ({ query, rid }) => {
   return (
     <div className="flex flex-col gap-8">
       <Answer markdown={markdown} sources={sources} />
-      <Sources sources={sources} />
+      {markdown && sources.length != 0 && <Sources sources={sources} />}
+      {markdown && actions.length != 0 && <Actions sources={actions} />}
       <Related relates={relates} />
       {error && (
         <div className="absolute inset-4 flex items-center justify-center  backdrop-blur-sm">
